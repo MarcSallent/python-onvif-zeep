@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 __version__ = '0.0.1'
 import datetime as dt
+import re
 import logging
 import os.path
 from threading import Thread, RLock
@@ -233,9 +234,12 @@ class ONVIFCamera(object):
         for name in capabilities:
             capability = capabilities[name]
             try:
-                if name.lower() in SERVICES and capability is not None:
-                    ns = SERVICES[name.lower()]['ns']
-                    self.xaddrs[ns] = capability['XAddr']
+                if name.lower() in SERVICES:
+                    if capability is not None:
+                        ns = SERVICES[name.lower()]['ns']
+                        remote_xaddr = re.sub(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', self.host+":"+str(self.port), capability['XAddr'])
+                        self.xaddrs[ns] = remote_xaddr
+                        # self.xaddrs[ns] = capability['XAddr']
             except Exception:
                 logger.exception('Unexpected service type')
 
